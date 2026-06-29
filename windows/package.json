@@ -1,0 +1,42 @@
+{
+  "name": "replit-hub-desktop",
+  "version": "1.0.0",
+  "description": "Replit Multi-Account Hub — Desktop App for Windows",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "server": "node server.cjs",
+    "setup": "npm install",
+    "build-win": "electron-builder --win --x64",
+    "build-win-portable": "electron-builder --win portable --x64"
+  },
+  "build": {
+    "appId": "com.replit.hub",
+    "productName": "Replit Hub",
+    "directories": { "output": "dist" },
+    "files": ["main.js", "preload.js", "server.cjs", "frontend/**/*", "node_modules/**/*", "package.json"],
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "portable", "arch": ["x64"] }
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Replit Hub"
+    }
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.3",
+    "sql.js": "^1.11.0"
+  },
+  "devDependencies": {
+    "electron": "^29.1.0",
+    "electron-builder": "^24.13.3"
+  }
+}

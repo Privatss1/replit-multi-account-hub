@@ -1,0 +1,1212 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: Replit Multi-Account Hub API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: accounts
+    description: Replit account management
+  - name: projects
+    description: Project management
+  - name: memories
+    description: Per-project memory management
+  - name: skills
+    description: Skills library
+  - name: knowledge
+    description: Knowledge base management
+  - name: apikeys
+    description: External API key management
+  - name: conversations
+    description: Conversation history
+  - name: dashboard
+    description: Dashboard summaries
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /accounts:
+    get:
+      operationId: listAccounts
+      tags: [accounts]
+      summary: List all connected Replit accounts
+      responses:
+        "200":
+          description: List of accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Account"
+    post:
+      operationId: createAccount
+      tags: [accounts]
+      summary: Add a new Replit account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccountInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+
+  /accounts/{id}:
+    get:
+      operationId: getAccount
+      tags: [accounts]
+      summary: Get account by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Account
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+    patch:
+      operationId: updateAccount
+      tags: [accounts]
+      summary: Update account
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccountUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+    delete:
+      operationId: deleteAccount
+      tags: [accounts]
+      summary: Remove account
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /accounts/{id}/verify:
+    post:
+      operationId: verifyAccount
+      tags: [accounts]
+      summary: Verify account token is valid
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Verification result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountVerifyResult"
+
+  /projects:
+    get:
+      operationId: listProjects
+      tags: [projects]
+      summary: List all projects
+      responses:
+        "200":
+          description: Projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Project"
+    post:
+      operationId: createProject
+      tags: [projects]
+      summary: Create a project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+
+  /projects/{id}:
+    get:
+      operationId: getProject
+      tags: [projects]
+      summary: Get project by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+    patch:
+      operationId: updateProject
+      tags: [projects]
+      summary: Update project
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+    delete:
+      operationId: deleteProject
+      tags: [projects]
+      summary: Delete project
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /projects/{id}/accounts:
+    get:
+      operationId: getProjectAccounts
+      tags: [projects]
+      summary: Get accounts linked to project
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Linked accounts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Account"
+    post:
+      operationId: linkAccountToProject
+      tags: [projects]
+      summary: Link an account to a project
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectAccountLink"
+      responses:
+        "200":
+          description: Linked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+
+  /projects/{id}/accounts/{accountId}:
+    delete:
+      operationId: unlinkAccountFromProject
+      tags: [projects]
+      summary: Unlink an account from a project
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Unlinked
+
+  /memories:
+    get:
+      operationId: listMemories
+      tags: [memories]
+      summary: List memories with optional project filter
+      parameters:
+        - name: projectId
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Memories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Memory"
+    post:
+      operationId: createMemory
+      tags: [memories]
+      summary: Create a memory entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MemoryInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Memory"
+
+  /memories/{id}:
+    patch:
+      operationId: updateMemory
+      tags: [memories]
+      summary: Update memory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MemoryUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Memory"
+    delete:
+      operationId: deleteMemory
+      tags: [memories]
+      summary: Delete memory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /skills:
+    get:
+      operationId: listSkills
+      tags: [skills]
+      summary: List skills library
+      parameters:
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Skills
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Skill"
+    post:
+      operationId: createSkill
+      tags: [skills]
+      summary: Create a skill
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SkillInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Skill"
+
+  /skills/{id}:
+    patch:
+      operationId: updateSkill
+      tags: [skills]
+      summary: Update skill
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SkillUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Skill"
+    delete:
+      operationId: deleteSkill
+      tags: [skills]
+      summary: Delete skill
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /knowledge:
+    get:
+      operationId: listKnowledge
+      tags: [knowledge]
+      summary: List knowledge items
+      parameters:
+        - name: projectId
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Knowledge items
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/KnowledgeItem"
+    post:
+      operationId: createKnowledge
+      tags: [knowledge]
+      summary: Add a knowledge item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/KnowledgeInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KnowledgeItem"
+
+  /knowledge/{id}:
+    patch:
+      operationId: updateKnowledge
+      tags: [knowledge]
+      summary: Update knowledge item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/KnowledgeUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KnowledgeItem"
+    delete:
+      operationId: deleteKnowledge
+      tags: [knowledge]
+      summary: Delete knowledge item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /apikeys:
+    get:
+      operationId: listApiKeys
+      tags: [apikeys]
+      summary: List stored API keys (masked)
+      responses:
+        "200":
+          description: API keys (values masked)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiKey"
+    post:
+      operationId: createApiKey
+      tags: [apikeys]
+      summary: Store an API key
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiKeyInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiKey"
+
+  /apikeys/{id}:
+    patch:
+      operationId: updateApiKey
+      tags: [apikeys]
+      summary: Update API key
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiKeyUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiKey"
+    delete:
+      operationId: deleteApiKey
+      tags: [apikeys]
+      summary: Delete API key
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+
+  /conversations:
+    get:
+      operationId: listConversations
+      tags: [conversations]
+      summary: List conversations
+      parameters:
+        - name: projectId
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: accountId
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Conversations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Conversation"
+
+  /conversations/{id}/messages:
+    get:
+      operationId: getConversationMessages
+      tags: [conversations]
+      summary: Get messages for a conversation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Messages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Message"
+
+  /conversations/{id}/send:
+    post:
+      operationId: sendMessage
+      tags: [conversations]
+      summary: Send a message to the agent
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessageInput"
+      responses:
+        "201":
+          description: Message sent and response received
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+
+  /projects/{id}/chat:
+    post:
+      operationId: startProjectChat
+      tags: [conversations]
+      summary: Start a new chat session for a project
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatStartInput"
+      responses:
+        "201":
+          description: Conversation started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Conversation"
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard overview statistics
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/recent-activity:
+    get:
+      operationId: getRecentActivity
+      tags: [dashboard]
+      summary: Get recent activity feed
+      responses:
+        "200":
+          description: Recent activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityItem"
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    Account:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        username:
+          type: string
+        tokenMasked:
+          type: string
+        status:
+          type: string
+          enum: [active, inactive, error]
+        avatarUrl:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+      required:
+        - id
+        - name
+        - username
+        - tokenMasked
+        - status
+        - createdAt
+
+    AccountInput:
+      type: object
+      properties:
+        name:
+          type: string
+        username:
+          type: string
+        token:
+          type: string
+      required:
+        - name
+        - username
+        - token
+
+    AccountUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        username:
+          type: string
+        token:
+          type: string
+        status:
+          type: string
+
+    AccountVerifyResult:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        username:
+          type: string
+        message:
+          type: string
+      required:
+        - valid
+        - message
+
+    Project:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: ["string", "null"]
+        replUrl:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [active, paused, completed]
+        accountCount:
+          type: integer
+        memoryCount:
+          type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - name
+        - status
+        - accountCount
+        - memoryCount
+        - createdAt
+        - updatedAt
+
+    ProjectInput:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        replUrl:
+          type: string
+      required:
+        - name
+
+    ProjectUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        replUrl:
+          type: string
+        status:
+          type: string
+
+    ProjectAccountLink:
+      type: object
+      properties:
+        accountId:
+          type: integer
+      required:
+        - accountId
+
+    Memory:
+      type: object
+      properties:
+        id:
+          type: integer
+        projectId:
+          type: integer
+        title:
+          type: string
+        content:
+          type: string
+        category:
+          type: string
+        importance:
+          type: integer
+        createdAt:
+          type: string
+        updatedAt:
+          type: string
+      required:
+        - id
+        - projectId
+        - title
+        - content
+        - category
+        - importance
+        - createdAt
+        - updatedAt
+
+    MemoryInput:
+      type: object
+      properties:
+        projectId:
+          type: integer
+        title:
+          type: string
+        content:
+          type: string
+        category:
+          type: string
+        importance:
+          type: integer
+      required:
+        - projectId
+        - title
+        - content
+        - category
+
+    MemoryUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        category:
+          type: string
+        importance:
+          type: integer
+
+    Skill:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        prompt:
+          type: string
+        category:
+          type: string
+        usageCount:
+          type: integer
+        createdAt:
+          type: string
+      required:
+        - id
+        - name
+        - description
+        - prompt
+        - category
+        - usageCount
+        - createdAt
+
+    SkillInput:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        prompt:
+          type: string
+        category:
+          type: string
+      required:
+        - name
+        - description
+        - prompt
+        - category
+
+    SkillUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        prompt:
+          type: string
+        category:
+          type: string
+
+    KnowledgeItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        projectId:
+          type: ["integer", "null"]
+        title:
+          type: string
+        content:
+          type: string
+        type:
+          type: string
+          enum: [note, document, url, code, image]
+        tags:
+          type: string
+        createdAt:
+          type: string
+      required:
+        - id
+        - title
+        - content
+        - type
+        - tags
+        - createdAt
+
+    KnowledgeInput:
+      type: object
+      properties:
+        projectId:
+          type: integer
+        title:
+          type: string
+        content:
+          type: string
+        type:
+          type: string
+        tags:
+          type: string
+      required:
+        - title
+        - content
+        - type
+
+    KnowledgeUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        type:
+          type: string
+        tags:
+          type: string
+
+    ApiKey:
+      type: object
+      properties:
+        id:
+          type: integer
+        service:
+          type: string
+        label:
+          type: string
+        keyMasked:
+          type: string
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+      required:
+        - id
+        - service
+        - label
+        - keyMasked
+        - isActive
+        - createdAt
+
+    ApiKeyInput:
+      type: object
+      properties:
+        service:
+          type: string
+        label:
+          type: string
+        key:
+          type: string
+      required:
+        - service
+        - label
+        - key
+
+    ApiKeyUpdate:
+      type: object
+      properties:
+        service:
+          type: string
+        label:
+          type: string
+        key:
+          type: string
+        isActive:
+          type: boolean
+
+    Conversation:
+      type: object
+      properties:
+        id:
+          type: integer
+        projectId:
+          type: integer
+        accountId:
+          type: integer
+        accountName:
+          type: string
+        title:
+          type: string
+        messageCount:
+          type: integer
+        lastMessageAt:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+      required:
+        - id
+        - projectId
+        - accountId
+        - accountName
+        - title
+        - messageCount
+        - createdAt
+
+    Message:
+      type: object
+      properties:
+        id:
+          type: integer
+        conversationId:
+          type: integer
+        role:
+          type: string
+          enum: [user, assistant, system]
+        content:
+          type: string
+        attachments:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+      required:
+        - id
+        - conversationId
+        - role
+        - content
+        - createdAt
+
+    MessageInput:
+      type: object
+      properties:
+        content:
+          type: string
+        attachments:
+          type: string
+      required:
+        - content
+
+    ChatStartInput:
+      type: object
+      properties:
+        accountId:
+          type: integer
+        title:
+          type: string
+        initialMessage:
+          type: string
+      required:
+        - accountId
+        - title
+
+    DashboardSummary:
+      type: object
+      properties:
+        totalAccounts:
+          type: integer
+        activeAccounts:
+          type: integer
+        totalProjects:
+          type: integer
+        activeProjects:
+          type: integer
+        totalMemories:
+          type: integer
+        totalSkills:
+          type: integer
+        totalConversations:
+          type: integer
+        totalMessages:
+          type: integer
+      required:
+        - totalAccounts
+        - activeAccounts
+        - totalProjects
+        - activeProjects
+        - totalMemories
+        - totalSkills
+        - totalConversations
+        - totalMessages
+
+    ActivityItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        type:
+          type: string
+        description:
+          type: string
+        projectName:
+          type: ["string", "null"]
+        accountName:
+          type: ["string", "null"]
+        createdAt:
+          type: string
+      required:
+        - id
+        - type
+        - description
+        - createdAt
